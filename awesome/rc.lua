@@ -20,18 +20,16 @@ require("awful.hotkeys_popup.keys")
 
 require("error-handling")
 
-config = {
-  vars = require("user-variables"),
-  layouts = require("layouts")
-}
+config = {}
+config.vars = require("user-variables")
+config.menu = require("menu")
+config.layouts = require("layouts")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = config.vars.terminal .. " -e " .. editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -40,23 +38,17 @@ editor_cmd = config.vars.terminal .. " -e " .. editor
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = config.vars.modkey
 
--- {{{ Menu
--- Create a launcher widget and a main menu
-myawesomemenu = {
-   { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-   { "manual", config.vars.terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", function() awesome.quit() end },
-}
+config.main_menu = awful.menu({
+    items = {
+        { "awesome", config.menu, beautiful.awesome_icon },
+        { "open terminal", config.vars.terminal }
+    }
+})
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", config.vars.terminal }
-                                  }
-                        })
-
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+config.launcher = awful.widget.launcher({
+    image = beautiful.awesome_icon,
+    menu = config.main_menu
+})
 
 -- Menubar configuration
 menubar.utils.terminal = config.vars.terminal -- Set the terminal for applications that require it
@@ -163,7 +155,7 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            mylauncher,
+            config.launcher,
             s.mytaglist,
             s.mypromptbox,
         },
@@ -181,7 +173,7 @@ end)
 
 -- {{{ Mouse bindings
 root.buttons(gears.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end),
+    awful.button({ }, 3, function () config.main_menu:toggle() end),
     awful.button({ }, 4, awful.tag.viewnext),
     awful.button({ }, 5, awful.tag.viewprev)
 ))
@@ -210,7 +202,7 @@ globalkeys = gears.table.join(
         end,
         {description = "focus previous by index", group = "client"}
     ),
-    awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
+    awful.key({ modkey,           }, "w", function () config.main_menu:show() end,
               {description = "show main menu", group = "awesome"}),
 
     -- Layout manipulation
