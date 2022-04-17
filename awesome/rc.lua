@@ -18,10 +18,10 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
-require("error-handling")
+require("error_handling")
 
 config = {}
-config.vars = require("user-variables")
+config.vars = require("user_variables")
 config.menu = require("menu")
 config.layouts = require("layouts")
 
